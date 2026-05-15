@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ROAD-I 계정 삭제</title>
+  <title>ROAD-I アカウント削除 / Account Deletion / 계정 삭제</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -107,47 +107,76 @@
       border: 2px solid #fff; border-top: 2px solid transparent;
       border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── 언어 전환 버튼 ── */
+    .lang-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .lang-btn {
+      padding: 4px 10px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      background: transparent;
+      font-size: 12px;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .lang-btn.active {
+      background: #1a3a6b;
+      color: #fff;
+      border-color: #1a3a6b;
+    }
   </style>
 </head>
 <body>
   <div class="card">
+    <div class="lang-bar">
+      <button class="lang-btn active" onclick="setLang('ko')">한국어</button>
+      <button class="lang-btn" onclick="setLang('en')">English</button>
+      <button class="lang-btn" onclick="setLang('ja')">日本語</button>
+    </div>
+
     <div class="logo">🛣️ ROAD-I</div>
-    <div class="subtitle">계정 및 데이터 삭제 요청</div>
+    <div class="subtitle" id="txt-subtitle">계정 및 데이터 삭제 요청</div>
 
     <div class="warning-box">
       <span class="warning-icon">⚠️</span>
-      <div class="warning-text">
+      <div class="warning-text" id="txt-warning">
         계정 삭제 후에는 모든 데이터가 <strong>즉시 영구 삭제</strong>되며,
         어떠한 방법으로도 복구할 수 없습니다.
       </div>
     </div>
 
-    <h3>삭제되는 데이터</h3>
+    <h3 id="txt-data-title">삭제되는 데이터</h3>
     <ul class="data-list">
-      <li><span>📍</span> 실시간 위치 기록 전체</li>
-      <li><span>💬</span> 그룹 채팅 메시지</li>
-      <li><span>📅</span> 모임 일정 및 그룹 정보</li>
-      <li><span>🏠</span> 저장된 개인 장소</li>
-      <li><span>👤</span> 프로필 (이름, 닉네임)</li>
-      <li><span>🔔</span> 푸시 알림 설정</li>
-      <li><span>🏪</span> 샵 구독 및 제안 내역</li>
+      <li><span>📍</span> <span id="txt-data1">실시간 위치 기록 전체</span></li>
+      <li><span>💬</span> <span id="txt-data2">그룹 채팅 메시지</span></li>
+      <li><span>📅</span> <span id="txt-data3">모임 일정 및 그룹 정보</span></li>
+      <li><span>🏠</span> <span id="txt-data4">저장된 개인 장소</span></li>
+      <li><span>👤</span> <span id="txt-data5">프로필 (이름, 닉네임)</span></li>
+      <li><span>🔔</span> <span id="txt-data6">푸시 알림 설정</span></li>
+      <li><span>🏪</span> <span id="txt-data7">샵 구독 및 제안 내역</span></li>
     </ul>
 
-    <label for="email">이메일</label>
+    <label for="email" id="txt-label-email">이메일</label>
     <input type="email" id="email" placeholder="가입한 이메일 주소">
 
-    <label for="pw">비밀번호</label>
+    <label for="pw" id="txt-label-pw">비밀번호</label>
     <input type="password" id="pw" placeholder="현재 비밀번호">
 
     <label class="checkbox-label">
       <input type="checkbox" id="agree">
-      <span>모든 데이터가 즉시 삭제되며 복구할 수 없음을 이해하고 동의합니다.</span>
+      <span id="txt-agree">모든 데이터가 즉시 삭제되며 복구할 수 없음을 이해하고 동의합니다.</span>
     </label>
 
     <button class="btn-delete" id="deleteBtn" onclick="deleteAccount()">
-      계정 영구 삭제
+      <span id="txt-btn-delete">계정 영구 삭제</span>
     </button>
-    <button class="btn-cancel" onclick="history.back()">취소</button>
+    <button class="btn-cancel" onclick="history.back()" id="txt-btn-cancel">취소</button>
 
     <div id="msg"></div>
   </div>
@@ -158,7 +187,124 @@
     const PROJECT_ID = '684a32e40002f3045e7f';
     const FUNCTION_URL = 'https://YOUR_FUNCTION_ENDPOINT/delete-user-account';
 
+    // ── 다국어 텍스트 ──────────────────────────────────────────────
+    const TEXTS = {
+      ko: {
+        subtitle:    '계정 및 데이터 삭제 요청',
+        warning:     '계정 삭제 후에는 모든 데이터가 <strong>즉시 영구 삭제</strong>되며, 어떠한 방법으로도 복구할 수 없습니다.',
+        dataTitle:   '삭제되는 데이터',
+        data1:       '실시간 위치 기록 전체',
+        data2:       '그룹 채팅 메시지',
+        data3:       '모임 일정 및 그룹 정보',
+        data4:       '저장된 개인 장소',
+        data5:       '프로필 (이름, 닉네임)',
+        data6:       '푸시 알림 설정',
+        data7:       '샵 구독 및 제안 내역',
+        labelEmail:  '이메일',
+        phEmail:     '가입한 이메일 주소',
+        labelPw:     '비밀번호',
+        phPw:        '현재 비밀번호',
+        agree:       '모든 데이터가 즉시 삭제되며 복구할 수 없음을 이해하고 동의합니다.',
+        btnDelete:   '계정 영구 삭제',
+        btnCancel:   '취소',
+        errInput:    '이메일과 비밀번호를 입력해주세요.',
+        errAgree:    '삭제에 동의해주세요.',
+        successMsg:  '✅ 계정이 성공적으로 삭제되었습니다. ROAD-I를 이용해 주셔서 감사합니다.',
+        loginFail:   '로그인 실패. 이메일 또는 비밀번호를 확인해주세요.',
+        serverErr:   '서버 오류가 발생했습니다.',
+      },
+      en: {
+        subtitle:    'Account & Data Deletion Request',
+        warning:     'Once deleted, all your data will be <strong>permanently removed immediately</strong> and cannot be recovered by any means.',
+        dataTitle:   'Data to be deleted',
+        data1:       'All real-time location history',
+        data2:       'Group chat messages',
+        data3:       'Meeting schedules & group info',
+        data4:       'Saved personal places',
+        data5:       'Profile (name, nickname)',
+        data6:       'Push notification settings',
+        data7:       'Shop subscriptions & proposals',
+        labelEmail:  'Email',
+        phEmail:     'Registered email address',
+        labelPw:     'Password',
+        phPw:        'Current password',
+        agree:       'I understand that all data will be immediately deleted and cannot be recovered.',
+        btnDelete:   'Permanently Delete Account',
+        btnCancel:   'Cancel',
+        errInput:    'Please enter your email and password.',
+        errAgree:    'Please agree to the deletion.',
+        successMsg:  '✅ Your account has been successfully deleted. Thank you for using ROAD-I.',
+        loginFail:   'Login failed. Please check your email or password.',
+        serverErr:   'A server error occurred.',
+      },
+      ja: {
+        subtitle:    'アカウント・データ削除リクエスト',
+        warning:     'アカウントを削除すると、すべてのデータが<strong>即時に完全削除</strong>され、いかなる方法でも復元できません。',
+        dataTitle:   '削除されるデータ',
+        data1:       'リアルタイム位置情報の全履歴',
+        data2:       'グループチャットメッセージ',
+        data3:       'イベントのスケジュールおよびグループ情報',
+        data4:       '保存した個人の場所',
+        data5:       'プロフィール（名前、ニックネーム）',
+        data6:       'プッシュ通知の設定',
+        data7:       'ショップのサブスクリプションおよび提案履歴',
+        labelEmail:  'メールアドレス',
+        phEmail:     '登録したメールアドレス',
+        labelPw:     'パスワード',
+        phPw:        '現在のパスワード',
+        agree:       'すべてのデータが即時に削除され、復元できないことを理解し同意します。',
+        btnDelete:   'アカウントを完全に削除する',
+        btnCancel:   'キャンセル',
+        errInput:    'メールアドレスとパスワードを入力してください。',
+        errAgree:    '削除に同意してください。',
+        successMsg:  '✅ アカウントが正常に削除されました。ROAD-Iをご利用いただきありがとうございました。',
+        loginFail:   'ログインに失敗しました。メールアドレスまたはパスワードを確認してください。',
+        serverErr:   'サーバーエラーが発生しました。',
+      },
+    };
+
+    let currentLang = 'ko';
+
+    function setLang(lang) {
+      currentLang = lang;
+      const t = TEXTS[lang];
+      document.documentElement.lang = lang;
+
+      document.getElementById('txt-subtitle').textContent    = t.subtitle;
+      document.getElementById('txt-warning').innerHTML       = t.warning;
+      document.getElementById('txt-data-title').textContent  = t.dataTitle;
+      document.getElementById('txt-data1').textContent       = t.data1;
+      document.getElementById('txt-data2').textContent       = t.data2;
+      document.getElementById('txt-data3').textContent       = t.data3;
+      document.getElementById('txt-data4').textContent       = t.data4;
+      document.getElementById('txt-data5').textContent       = t.data5;
+      document.getElementById('txt-data6').textContent       = t.data6;
+      document.getElementById('txt-data7').textContent       = t.data7;
+      document.getElementById('txt-label-email').textContent = t.labelEmail;
+      document.getElementById('email').placeholder           = t.phEmail;
+      document.getElementById('txt-label-pw').textContent    = t.labelPw;
+      document.getElementById('pw').placeholder              = t.phPw;
+      document.getElementById('txt-agree').textContent       = t.agree;
+      document.getElementById('txt-btn-delete').textContent  = t.btnDelete;
+      document.getElementById('txt-btn-cancel').textContent  = t.btnCancel;
+
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.trim() === langLabel(lang));
+      });
+    }
+
+    function langLabel(lang) {
+      return { ko: '한국어', en: 'English', ja: '日本語' }[lang];
+    }
+
+    // URL 파라미터로 초기 언어 설정
+    (function() {
+      const p = new URLSearchParams(window.location.search).get('lang');
+      if (p && TEXTS[p]) setLang(p);
+    })();
+
     async function deleteAccount() {
+      const t = TEXTS[currentLang];
       const email = document.getElementById('email').value.trim();
       const pw = document.getElementById('pw').value;
       const agreed = document.getElementById('agree').checked;
@@ -167,14 +313,8 @@
 
       msg.style.display = 'none';
 
-      if (!email || !pw) {
-        showMsg('이메일과 비밀번호를 입력해주세요.', 'error');
-        return;
-      }
-      if (!agreed) {
-        showMsg('삭제에 동의해주세요.', 'error');
-        return;
-      }
+      if (!email || !pw) { showMsg(t.errInput, 'error'); return; }
+      if (!agreed)       { showMsg(t.errAgree, 'error'); return; }
 
       btn.disabled = true;
       btn.innerHTML = '<span class="loading"></span>';
@@ -192,7 +332,7 @@
 
         if (!sessionRes.ok) {
           const err = await sessionRes.json();
-          throw new Error(err.message || '로그인 실패. 이메일 또는 비밀번호를 확인해주세요.');
+          throw new Error(err.message || t.loginFail);
         }
 
         const session = await sessionRes.json();
@@ -210,21 +350,21 @@
 
         const result = await delRes.json();
         if (result.success) {
-          showMsg('✅ 계정이 성공적으로 삭제되었습니다. ROAD-I를 이용해 주셔서 감사합니다.', 'success');
+          showMsg(t.successMsg, 'success');
           document.getElementById('deleteBtn').style.display = 'none';
         } else {
-          throw new Error(result.error || '서버 오류가 발생했습니다.');
+          throw new Error(result.error || t.serverErr);
         }
       } catch (e) {
         showMsg('❌ ' + e.message, 'error');
         btn.disabled = false;
-        btn.textContent = '계정 영구 삭제';
+        document.getElementById('txt-btn-delete').textContent = TEXTS[currentLang].btnDelete;
       }
     }
 
     function showMsg(text, type) {
       const msg = document.getElementById('msg');
-      msg.textContent = text;
+      msg.innerHTML = text;
       msg.className = type;
       msg.style.display = 'block';
     }
